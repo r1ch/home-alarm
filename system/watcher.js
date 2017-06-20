@@ -1,3 +1,4 @@
+'use strict'
 const EventEmitter = require('events').EventEmitter;
 const maxItems = 10;
 
