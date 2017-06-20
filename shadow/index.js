@@ -1,6 +1,6 @@
 const watcher = require('../system').getWatcher();
 const _ = require("lodash")
-const config = require("./config")
+const config = require("../config")
 var awsIot = require('aws-iot-device-sdk');
 var Q = [];
 var currentShadow;
