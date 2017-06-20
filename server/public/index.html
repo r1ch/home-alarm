@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js">
+	</script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js">
+	</script>
+	<script src="/assets/js/alarm.js" type="text/javascript">
+	</script>
+	<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css" rel="stylesheet">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<title>Home Alarm</title>
+</head>
+<body ng-app="alarmApp" ng-controller="mainController">
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript">
+	</script> 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js">
+	</script>
+	<nav>
+		<div class="nav-wrapper container">
+			<a class="brand-logo" href="#">Home Alarm</a>	
+		</div>
+	</nav>
+	<div class="container">
+		<div class = "row">
+			<div class = "col sm4 m4">
+				<h6 class = "header center">
+					<br>
+					<i class="large material-icons">{{armed ? "visibility" : "visibility_off"}}</i>	
+					<br>
+					{{state}}
+				</h6>
+			</div>
+			<div class = "col sm8 m8">
+				<span ng-if = "events.length == 0">No events yet</span>
+				<table ng-if = "events.length != 0">
+					<thead>
+						<tr>
+							<th>Time</th>
+							<th>Event</th>
+							<th>&nbsp;</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat = "event in events | orderBy : 'time' : true | limitTo: 2">
+							<td>{{event.time|date:'dMMMyy HH:mm'}}</td>
+							<td>{{event.event}}</td>
+						</tr>	
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="row center">
+			<a class="btn-large waves-effect waves-light" ng-click="changeArmedFrom(armed)">{{armed ? "Disarm":"Arm"}}</a>
+		</div>
+		<div class = "row" ng-repeat = "type in ['Sensor','Bell']">
+			<h4>{{type}}s</h4>
+			<div class = "col sm12 m6" ng-repeat = "component in components" ng-if = "component.type == type">
+				<div class="card">
+					<div class = "{{view}}" ng-repeat = "view in ['card-content','card-reveal']">
+						<span class="card-title activator">{{component.name}}
+							<i class="material-icons right">
+								{{view =='card-content' ? 'more_vert' : 'close'}}
+							</i>
+						</span>
+						<p ng-if = "component.events.length == 0">No events yet</p>
+						<table ng-if = "component.events.length != 0">
+							<thead>
+								<tr>
+									<th>Time</th>
+									<th>Event</th>
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat = "event in component.events | orderBy : 'time' : true | limitTo: (view == 'card-content' ? 1 : 10)">
+									<td>{{event.time|date:'dMMMyy HH:mm'}}</td>
+									<td>{{event.event}}</td>
+									<td><i class = "small material-icons">{{event.armed  ? "visibility" : "visibility_off"}}</i></td>
+								</tr>	
+							</tbody>
+						</table>
+					</div>
+					<div class="card-action" ng-if = "component.testable">
+						<a nohref ng-click = "testComponent(component.name)">Test this {{type}}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
