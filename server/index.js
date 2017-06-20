@@ -1,11 +1,11 @@
-const watcher = require("../system").getWatcher();
+const watcher = require("../system");
 var express = require('express');
 var app = express();
 
 var router = express.Router();
 
 router.get('/components', function (req, res) {
-  res.send(JSON.stringify(watcher.getComponents()))
+  res.send(JSON.stringify(watcher.components))
 })
 
 router.get('/components/:component', function (req, res) {
@@ -21,11 +21,11 @@ router.get('/components/:component/test',function(req,res){
 })
 
 router.get('/armed',function(req,res){
-  res.send(watcher.getArmed());
+  res.send(watcher.armed);
 })
 
 router.get('/state',function(req,res){
-  res.send(watcher.getState());
+  res.send(watcher.state);
 })
 
 router.get('/arm',function(req,res){
@@ -37,7 +37,7 @@ router.get('/disarm',function(req,res){
 })
 
 router.get('/events', function (req, res) {
-  res.send(JSON.stringify(watcher.getEvents()))
+  res.send(JSON.stringify(watcher.events))
 })
 
 app.use(express.static(__dirname+'/public'))

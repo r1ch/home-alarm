@@ -1,4 +1,4 @@
-const watcher = require('./watcher.js').getWatcher();
+const watcher = require('./index.js');
 const StateMachine = require('./state-machine.js')
 const State = require('./state.js')
 const sounder = watcher.getActual("Sounder")

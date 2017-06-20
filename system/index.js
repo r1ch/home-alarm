@@ -1,5 +1,3 @@
-const watcher = require('./watcher.js')
+const Watcher = require('./watcher.js')
 
-module.exports = {
-	getWatcher : watcher.getWatcher
-} 
+module.exports = new Watcher(); 
