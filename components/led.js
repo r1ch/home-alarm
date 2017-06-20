@@ -1,17 +1,19 @@
+'use strict'
 const pi = require('./pi.js');
 const OFFSET = 100;
 pi.sn3218Setup(OFFSET);
 
-module.exports = Led;
-function Led(pin){
-	this.pin = pin + OFFSET;
-}
+module.exports = class Led {
+	constructor(pin){
+		this.pin = pin + OFFSET;
+	}
 
-Led.prototype.on = function(){
-	pi.analogWrite(this.pin,1);
-}
+	on(){
+		pi.analogWrite(this.pin,1);
+	}
 
-Led.prototype.off = function(){
-	pi.analogWrite(this.pin,0);
+	off(){
+		pi.analogWrite(this.pin,0);
+	}
 }
 

@@ -1,5 +1,5 @@
 const alarm = require('./components')
-const watcher = require('./system').getWatcher()
+const watcher = require('./system')
 const server = require('./server')
 const shadow = require('./shadow')
 

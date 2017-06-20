@@ -1,4 +1,4 @@
-const watcher = require('../system').getWatcher();
+const watcher = require('../system');
 const _ = require("lodash")
 const config = require("../config")
 var awsIot = require('aws-iot-device-sdk');
@@ -23,10 +23,10 @@ shadow.on('connect', function() {
 	shadow.register('Alarm',{},()=>{
 		console.log("Connected to Amazon IoT")
 		watcher.on('change',()=>{
-			let newShadow = watcher.getShadow();
+			let newShadow = watcher.shadow;
 			queueUpdate(newShadow);
 		})
-		currentShadow = watcher.getShadow()
+		currentShadow = watcher.shadow
 		clientTokenUpdate = shadow.update('Alarm', currentShadow);
 	});
 });
