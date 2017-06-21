@@ -10,9 +10,9 @@ const WARNING_PERIOD = 60000
 const LAST_WARNING_PERIOD = 15000
 
 onQuiet = function(){
-		console.log("->Quiet",new Date())
-		sounder.stop(true);
-		bell.stop(true);
+	console.log("->Quiet",new Date())
+	sounder.stop(true);
+	bell.stop(true);
 }
 
 onArming = function(){
@@ -43,7 +43,6 @@ onWarning = function(){
 	},WARNING_PERIOD)
 }
 		
-
 exWarning = function(){
 	console.log("Warning->",new Date())
 	this.lastWarningTimeout && clearTimeout(this.lastWarningTimeout)
