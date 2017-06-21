@@ -42,7 +42,7 @@ onWarning = function(){
 		this.emit("timeup")
 	},WARNING_PERIOD)
 }
-		
+	
 exWarning = function(){
 	console.log("Warning->",new Date())
 	this.lastWarningTimeout && clearTimeout(this.lastWarningTimeout)
