@@ -42,7 +42,7 @@ onWarning = function(){
 		this.emit("timeup")
 	},WARNING_PERIOD)
 }
-
+	
 exWarning = function(){
 	console.log("Warning->",new Date())
 	this.lastWarningTimeout && clearTimeout(this.lastWarningTimeout)
@@ -53,6 +53,7 @@ exWarning = function(){
 onSounding = function(){
 	console.log("->Sounding",new Date())
 	//bell.start()
+	//sounder.start()
 }
 
 exSounding = function(){
