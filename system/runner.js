@@ -10,9 +10,9 @@ const WARNING_PERIOD = 60000
 const LAST_WARNING_PERIOD = 15000
 
 onQuiet = function(){
-	console.log("->Quiet",new Date())
-	sounder.stop(true);
-	bell.stop(true);
+		console.log("->Quiet",new Date())
+		sounder.stop(true);
+		bell.stop(true);
 }
 
 onArming = function(){
@@ -42,6 +42,7 @@ onWarning = function(){
 		this.emit("timeup")
 	},WARNING_PERIOD)
 }
+		
 
 exWarning = function(){
 	console.log("Warning->",new Date())
@@ -53,6 +54,7 @@ exWarning = function(){
 onSounding = function(){
 	console.log("->Sounding",new Date())
 	//bell.start()
+	//sounder.start()
 }
 
 exSounding = function(){
