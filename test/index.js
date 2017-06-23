@@ -313,7 +313,7 @@ describe("Home Alarm", function(){
 			
 			clock.tick(ARMING_PERIOD-1)	
 			assert(stateMachine.currentState.name === "arming","still arming")
-			clock.tick(ARMING_PERIOD)		
+			clock.tick(1)		
 
 		})
 
