@@ -11,7 +11,7 @@
   "dependencies": {
     "express": "^4.15.3",
     "lodash": "^4.17.4",
-    "wiring-pi": "^2.2.1"
+    "wiring-pi": "git+https://github.com/kohei0302/WiringPi-Node.git"
   },
   "devDependencies": {
     "chai": "^4.0.2",
