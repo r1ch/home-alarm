@@ -13,7 +13,7 @@ var shadow = awsIot.thingShadow({
   certPath: __dirname + config.certPath,
     caPath: __dirname + config.caPath,
   clientId: 'Alarm Master',
- keepAlive: 60 * 60,
+ keepalive: 60 * 60,
     region: config.iotRegion,
       host: config.iotHost
 });
