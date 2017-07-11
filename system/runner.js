@@ -52,8 +52,8 @@ exWarning = function(){
 
 onSounding = function(){
 	console.log("->Sounding",new Date())
-	//bell.start()
-	//sounder.start()
+	bell.start()
+	sounder.start()
 }
 
 exSounding = function(){
