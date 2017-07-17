@@ -13,7 +13,7 @@ var shadow = awsIot.thingShadow({
   certPath: __dirname + config.certPath,
     caPath: __dirname + config.caPath,
   clientId: 'Alarm Master',
- keepalive: 60 * 60,
+ keepalive: 60,
     region: config.iotRegion,
       host: config.iotHost
 });
@@ -110,10 +110,3 @@ function recurseUpdate(next,current){
 	return next
 }
 
-function heartbeat(){
-	let newShadow = watcher.shadow
-	queueUpdate(newShadow);
-}
-
-
-module.exports.heartbeat = heartbeat
