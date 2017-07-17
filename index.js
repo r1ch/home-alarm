@@ -17,3 +17,6 @@ watcher.addComponent(alarm.bell)
 watcher.addComponent(alarm.sounder)
 
 watcher.ready()
+
+
+setInternal(shadow.heartbeat,1000*60*60)

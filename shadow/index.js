@@ -56,9 +56,10 @@ shadow.on('timeout',
 });
 
 shadow.on('error',
-	function(error,b,c,d){
-		console.log("Error:",error,b,c,d)
+	function(error){
+		console.log("Error:",error)
 });
+
 
 
 function queueUpdate(update){
@@ -108,3 +109,11 @@ function recurseUpdate(next,current){
 	}
 	return next
 }
+
+function heartbeat(){
+	let newShadow = watcher.shadow
+	queueUpdate(newShadow);
+}
+
+
+module.exports.heartbeat = heartbeat

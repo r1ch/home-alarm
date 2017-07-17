@@ -171,7 +171,8 @@ module.exports = class Watcher extends EventEmitter{
 					armed: this._armed,
 					state: this._state,
 					components: this._components,
-					events: this._events
+					events: this._events,
+					heartbeat: Date.now()
 				}
 			}	
 		}
