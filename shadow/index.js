@@ -77,7 +77,7 @@ function tryUpdate(){
 			// did it work?
 			if(clientToken===null){
 				//No
-				console.log("Remote is busy")
+				//console.log("Remote is busy")
 				if(retry!==null){
 					//console.log("Operation in progress - retry later")
 					retry = setTimeout(()=>tryUpdate,1000)

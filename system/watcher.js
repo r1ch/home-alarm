@@ -144,6 +144,8 @@ module.exports = class Watcher extends EventEmitter{
 
 			if(type == 'Sensor' && _this._armed && event == 'movement'){
 				_this.emit('intruder')
+			} else if (type == 'Reader' && event == 'card'){
+				_this.disarm()
 			}
 	
 			_this.addEventForComponent(newEvent,component);
