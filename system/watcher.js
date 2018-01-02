@@ -132,7 +132,8 @@ module.exports = class Watcher extends EventEmitter{
 
 	getComponentHandler(component,type,event){
 		var _this = this
-		return function(reporter,time){
+		return function(reporter,time,c,d){
+			console.log("CH",reporter,time,c,d)
 			let newEvent = {
 				component:component,
 				type:type,
