@@ -4,7 +4,6 @@ const config = require("../config")
 var awsIot = require('aws-iot-device-sdk');
 var Q = [];
 var currentShadow;
-var clientTokenUpdate;
 var retry = null;
 
 
@@ -13,7 +12,6 @@ var shadow = awsIot.thingShadow({
   certPath: __dirname + config.certPath,
     caPath: __dirname + config.caPath,
   clientId: 'Alarm Master',
- keepalive: 60,
     region: config.iotRegion,
       host: config.iotHost
 });
@@ -24,17 +22,18 @@ shadow.on('connect', function() {
 		console.log("Connected to Amazon IoT")
 		watcher.on('change',()=>{
 			let newShadow = watcher.shadow;
+			//console.log("Got new shadow")
 			queueUpdate(newShadow);
 		})
 		currentShadow = watcher.shadow
-		clientTokenUpdate = shadow.update('Alarm', currentShadow);
+		shadow.update('Alarm', currentShadow);
 	});
 });
 
 
 shadow.on('status', 
     function(thingName, stat, clientToken, stateObject) {
-	clientTokenUpdate = clientToken;
+	//console.log("Status",clientToken)
 	tryUpdate();
 });
 
@@ -51,7 +50,7 @@ shadow.on('delta',
 
 shadow.on('timeout',
     function(thingName, clientToken) {
-	clientTokenUpdate = clientToken;
+	//console.error("Timeout",clientToken)
 	tryUpdate();
 });
 
@@ -64,25 +63,39 @@ shadow.on('error',
 
 function queueUpdate(update){
 	Q.unshift(update);
+	//console.log("Queued, now",Q.length)
 	tryUpdate();
 }
 
 function tryUpdate(){
-	if(Q.length === 0){
-	} else if (null == clientTokenUpdate){
-	} else {
+	if(Q.length !==0){
 		let nextShadow  = Q.pop()
 		let update = computeUpdate(nextShadow,currentShadow)
 		if(update){
-			update.clientToken = clientTokenUpdate
-			clientTokenUpdate = shadow.update('Alarm', update);
-			if(null == clientTokenUpdate){
-				Q.push(nextShadow) 
+			//console.log(JSON.stringify(update))
+			let clientToken = shadow.update('Alarm',update)
+			// did it work?
+			if(clientToken===null){
+				//No
+				console.log("Remote is busy")
+				if(retry!==null){
+					//console.log("Operation in progress - retry later")
+					retry = setTimeout(()=>tryUpdate,1000)
+				} else {
+					//console.log("Retry queued")	
+				}
+				Q.push(nextShadow)
+				//console.log("Requeued",Q.length)
 			} else {
-				currentShadow = _.cloneDeep(nextShadow);
+				//console.log("Update succeeded",clientToken)
+				currentShadow = _.cloneDeep(nextShadow)
 			}
+		} else {
+			//console.log("Trivial update dropped")
 		}
-	}
+	} else {
+		//console.log("Empty Q")
+	}	
 }
 
 function computeUpdate(nextShadow,currentShadow){
