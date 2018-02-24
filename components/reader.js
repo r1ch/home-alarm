@@ -24,7 +24,7 @@ module.exports = class Reader extends EventEmitter{
 			if(null!==uid){
 				if(config.cards && config.cards[uid.join(":")]){
 					console.log("Found",config.cards[uid.join(":")])
-					_this.emit('card',config.cards[uid.join(":")])
+					_this.emit('card',config.cards[uid.join(":")],Date.now())
 				} else {
 					console.log("Unknown card",uid.join(":"))
 				}
@@ -60,6 +60,7 @@ module.exports = class Reader extends EventEmitter{
 
 		if (!this.chip.authenticate(8, config.key, uid)) {
 			//Auth error
+			console.log("RFID auth error")
 			return null;
 		}
 
