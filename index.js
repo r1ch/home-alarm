@@ -15,6 +15,5 @@ alarm.sensors.forEach((sensor)=>{
 
 watcher.addComponent(alarm.bell)
 watcher.addComponent(alarm.sounder)
-watcher.addComponent(alarm.reader)
 alarm.reader.start()
 watcher.ready()
