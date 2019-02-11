@@ -3,7 +3,6 @@ const Bell = require('./bell.js')
 const Led = require('./led.js')
 const Reader = require('./reader.js')
 
-const reader = new Reader();
 const lounge = new Sensor("Lounge",20,13)
 const entry = new Sensor("Entry",26,14)
 const sounder = new Bell("Sounder",5,3)
@@ -14,7 +13,6 @@ const warn = new Led(15)
 
 module.exports = {
 	sensors: [lounge,entry],
-	reader: reader,
 	lights: {
 		power: power,
 		comms: comms,
