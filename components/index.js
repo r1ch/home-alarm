@@ -1,7 +1,6 @@
 const Sensor = require('./sensor.js')
 const Bell = require('./bell.js')
 const Led = require('./led.js')
-const Reader = require('./reader.js')
 
 const lounge = new Sensor("Lounge",20,13)
 const entry = new Sensor("Entry",26,14)
