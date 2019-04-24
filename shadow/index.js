@@ -55,7 +55,7 @@ shadow.on('timeout',
 });
 
 shadow.on('error',
-	function(error){
+	function(error){	
 		console.log("Error:",Date.now())
 });
 
@@ -69,57 +69,19 @@ function queueUpdate(update){
 
 function tryUpdate(){
 	if(Q.length !==0){
-		let nextShadow  = Q.pop()
-		let update = computeUpdate(nextShadow,currentShadow)
-		if(update){
-			//console.log(JSON.stringify(update))
-			let clientToken = shadow.update('Alarm',update)
-			// did it work?
-			if(clientToken===null){
-				//No
-				//console.log("Remote is busy")
-				if(retry!==null){
-					//console.log("Operation in progress - retry later")
-					retry = setTimeout(()=>tryUpdate,1000)
-				} else {
-					//console.log("Retry queued")	
-				}
-				Q.push(nextShadow)
-				//console.log("Requeued",Q.length)
-			} else {
-				//console.log("Update succeeded",clientToken)
-				currentShadow = _.cloneDeep(nextShadow)
-			}
+		let update  = Q.pop()
+		let clientToken = shadow.update('Alarm',update)
+		if(clientToken !== null){
+			console.log(Date.now(),clientToken)
+		} else if(clientToken===null && retry!==null){
+				retry = setTimeout(()=>{
+					retry = null;
+					tryUpdate()
+				},100)
 		} else {
-			//console.log("Trivial update dropped")
-		}
-	} else {
-		//console.log("Empty Q")
-	}	
-}
-
-function computeUpdate(nextShadow,currentShadow){
-	if(!currentShadow) return nextShadow
-	var next = _.cloneDeep(nextShadow)
-	var current = _.cloneDeep(currentShadow)
-	delete next.version
-	delete next.clientToken
-	next.state.reported  = recurseUpdate(next.state.reported,current.state.reported)
-	return next
-}
-
-function recurseUpdate(next,current){
-	if(!current || typeof next !== 'object' || Array.isArray(next)) return next
-	delete next.test
-	for(var property in next){
-		if(next.hasOwnProperty(property) && typeof current[property] !== 'undefined'){
-			if(_.isEqual(current[property], next[property])){
-				delete next[property]
-			} else {
-				next[property] = recurseUpdate(next[property],current[property])
-			}
+			Q.push(update)
+			console.log("Requeued length now",Q.length)
 		}
 	}
-	return next
 }
 
