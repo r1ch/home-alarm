@@ -149,8 +149,6 @@ module.exports = class Watcher extends EventEmitter{
 			}
 	
 			_this.addEventForComponent(newEvent,component);
-			_this.emit('change')
-	
 		}
 	}
 
@@ -173,8 +171,6 @@ module.exports = class Watcher extends EventEmitter{
 				"reported":{
 					armed: this._armed,
 					state: this._state,
-					components: this._components,
-					events: this._events
 				}
 			}	
 		}

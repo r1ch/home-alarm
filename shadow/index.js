@@ -3,7 +3,6 @@ const _ = require("lodash")
 const config = require("../config")
 var awsIot = require('aws-iot-device-sdk');
 var Q = [];
-var currentShadow;
 var retry = null;
 
 
@@ -21,12 +20,9 @@ shadow.on('connect', function() {
 	shadow.register('Alarm',{},()=>{
 		console.log("Connected to Amazon IoT")
 		watcher.on('change',()=>{
-			let newShadow = watcher.shadow;
-			//console.log("Got new shadow")
-			queueUpdate(newShadow);
+			queueUpdate(watcher.shadow);
 		})
-		currentShadow = watcher.shadow
-		shadow.update('Alarm', currentShadow);
+		shadow.update('Alarm', watcher.shadow);
 	});
 });
 
