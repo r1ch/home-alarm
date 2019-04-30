@@ -12,7 +12,7 @@
     "aws-iot-device-sdk": "^2.1.0",
     "express": "^4.15.3",
     "lodash": "^4.17.4",
-    "wiring-pi": "git+https://github.com/kohei0302/WiringPi-Node.git"
+    "node-wiring-pi": "0.0.5"
   },
   "devDependencies": {
     "chai": "^4.0.2",

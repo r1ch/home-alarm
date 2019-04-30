@@ -1,6 +1,7 @@
 'use strict'
-const pi = require('./pi')
+const pi = require('./pi.js')
 const Led = require('./led.js')
+const Message  = require('../event-bus/message.js');
 const EventEmitter = require('events').EventEmitter
 
 const TEST_ON = 50;
@@ -8,6 +9,7 @@ const WARN_ON = 50;
 const WARN_OFF_SLOW = 1000;
 const WARN_OFF_FAST = 300;
 var   WARN_OFF = WARN_OFF_SLOW
+
 
 module.exports = class Bell extends EventEmitter{
 
@@ -18,32 +20,33 @@ module.exports = class Bell extends EventEmitter{
 		this.pin = pin;
 		this.ledOn = new Led(ledOn);
 		this.ledOff = ledOff && new Led(ledOff);
-		this.emits = ["started","stopped","tested","arming"]
 		pi.pinMode(pin,pi.OUTPUT);
 		this.stop();
 	}
 
+	registerWith(eventBus){
+		eventBus.register({
+			caller:this,
+			provides:['sounding','silenced']
+		})
+	}
+
 	start(suppress){
-		if(!suppress) this.emit("started",this.name,Date.now())
+		if(!suppress) this.emit(...Message('sounding',this.name))
 		this.ledOff && this.ledOff.off()
 		pi.digitalWrite(this.pin,1)
 		this.ledOn.on()
 	}
 
 	stop(suppress){
-		if(!suppress) this.emit("stopped",this.name,Date.now())
+		if(!suppress) this.emit(...Message('silenced',this.name))
 		this.ledOn.off()
 		pi.digitalWrite(this.pin,0)
 		this.ledOff && this.ledOff.on()
 	}
 
-	test(){
-		this.short(TEST_ON,"tested")
-	}
-
-	short(interval,message){
+	short(interval){
 		var _this = this;
-		message && this.emit(message,this.name,Date.now())
 		setTimeout(function(){_this.stop(true)},interval);
 		this.start(true)
 	}

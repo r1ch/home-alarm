@@ -1,8 +1,12 @@
-const watcher = require('./index.js');
+const Hardware = require('../hardware');
+const Message = require('../event-bus/message');
+const EventBus = require('../event-bus')
 const StateMachine = require('./state-machine.js')
 const State = require('./state.js')
-const sounder = watcher.getActual("Sounder")
-const bell = watcher.getActual("Bell")
+
+
+const sounder = Hardware.sounder
+const bell = Hardware.bell
 
 const ARMING_BEEP = 50
 const ARMING_PERIOD = 30000
@@ -19,7 +23,7 @@ onArming = function(){
 	console.log("->Arming",new Date())
 	sounder.short(ARMING_BEEP,"arming")
 	this.armingTimeout = setTimeout(()=>{
-		this.emit("timeup")
+		this.emit(...Message('armingTimeout'))
 	},ARMING_PERIOD)
 }
 
@@ -39,7 +43,7 @@ onWarning = function(){
 		sounder.lastWarning();
 	},WARNING_PERIOD-LAST_WARNING_PERIOD)
 	this.warningTimeout = setTimeout(()=>{
-		this.emit("timeup")
+		this.emit(...Message('warningTimeout'))
 	},WARNING_PERIOD)
 }
 	
@@ -76,7 +80,7 @@ quiet.addTransition('armed',arming)
 quiet.onEntry = onQuiet
 
 arming.addTransition('disarmed',quiet)
-arming.addTransition('timeup',guarding)
+arming.addTransition('armingTimeout',guarding)
 arming.onEntry = onArming
 arming.onExit = exArming
 
@@ -85,7 +89,7 @@ guarding.addTransition('intruder',warning)
 guarding.onEntry = onGuarding
 
 warning.addTransition('disarmed',quiet)
-warning.addTransition('timeup',sounding)
+warning.addTransition('warningTimeout',sounding)
 warning.onEntry = onWarning
 warning.onExit = exWarning
 
@@ -95,14 +99,16 @@ sounding.onExit = exSounding
 
 stateMachine.setInitial(quiet)
 
-//register for the right events
-//External
-watcher.on('armed',stateMachine.getHandler('armed'))
-watcher.on('disarmed',stateMachine.getHandler('disarmed'))
-watcher.on('intruder',stateMachine.getHandler('intruder'))
-
-//Internal
-warning.on('timeup',stateMachine.getHandler('timeup'))
-arming.on('timeup',stateMachine.getHandler('timeup'))
+EventBus.register({
+	caller:this,
+	provides:['warningTimeout','armingTimeout'],
+	needs:{
+		warningTimeout: stateMachine.eventHandler,
+		armingTimeout: stateMachine.eventHandler,
+		armed: stateMachine.eventHandler,
+		disarmed: stateMachine.eventHandler,
+		intruder: stateMachine.eventHandler,
+	}
+})
 
 module.exports = stateMachine

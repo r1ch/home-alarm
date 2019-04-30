@@ -1,9 +1,7 @@
-const EventEmitter = require("events").EventEmitter
-
-module.exports = class State extends EventEmitter{
+module.exports = class State {
 	constructor(name){
 		super()
-	        this._name = name;
+	    this._name = name;
 		this.transitions = {}
 		this.onEntry = ()=>{}
 		this.onExit = ()=>{}
@@ -17,8 +15,8 @@ module.exports = class State extends EventEmitter{
 		this._name = name
 	}
 	
-	addTransition(event,mode){
-        	this.transitions[event] = mode
+	addTransition(event){
+        this.transitions[event]
 	}
 
 }
