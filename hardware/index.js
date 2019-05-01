@@ -1,23 +1,23 @@
-const Sensor = require('./sensor.js')
-const Bell = require('./bell.js')
-const Led = require('./led.js')
+const gpio  =  require('rpi-gpio')
+const Sensor = require('./sensor')
+const Bell = require('./bell')
 const EventBus = require('../event-bus')
 
-const lounge = new Sensor("Lounge",20,13)
-const entry = new Sensor("Entry",26,14)
-const sounder = new Bell("Sounder",5,3)
-const bell = new Bell("Bell",13,6,7) 
-const power = new Led(17)
-const comms = new Led(16)
-const warn = new Led(15)
+const lounge = new Sensor("Lounge",38)
+lounge.registerWith(EventBus);
+
+const entry = new Sensor("Entry",37)
+entry.registerWith(EventBus)
+
+const sounder = new Bell("Sounder",29)
+sounder.registerWith(EventBus)
+
+const bell = new Bell("Bell",33) 
+bell.registerWith(EventBus)
 
 module.exports = {
 	sensors: [lounge,entry],
-	lights: {
-		power: power,
-		comms: comms,
-		warn: warn
-	},
 	sounder: sounder,
 	bell: bell
 }
+

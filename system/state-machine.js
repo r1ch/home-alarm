@@ -2,9 +2,10 @@ const EventEmitter = require('events').EventEmitter;
 const Message =  require('../event-bus/message')
 
 module.exports = class StateMachine extends EventEmitter{
-	constructor(){
+	constructor(name){
 		super();
-        this._currentState = null;
+		this.name = name
+        	this._currentState = null;
 		this._initialState = null;
 	}
 
@@ -35,10 +36,13 @@ module.exports = class StateMachine extends EventEmitter{
 				_this._currentState.onExit()
 				_this._currentState = _this._currentState.transitions[event.name]
 				_this._currentState.onEntry()
-				this.emit(...Message('stateChange',this._currentState.name))
+				this.emit(...Message(`${this.name}:${this._currentState.name}`,this._currentState.name))
+			} else if(_this.currentState.consumers[event.name]){
+				console.log(_this._currentState.name,"consuming:",event.name)
+                                _this._currentState.consumers[event.name](event)
 			} else {
-                console.log(_this._currentState.name,". (",event.name,")")
-        	}
+               			console.log(_this._currentState.name,". (",event.name,")")
+        		}
 		}
 	}
 }

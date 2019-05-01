@@ -17,6 +17,7 @@ onQuiet = function(){
 	console.log("->Quiet",new Date())
 	sounder.stop(true);
 	bell.stop(true);
+	this.emit(...Message('disarmed'))
 }
 
 onArming = function(){
@@ -34,6 +35,7 @@ exArming = function(){
 
 onGuarding = function(){
 	console.log("->Guarding",new Date())
+	this.emit(...Message('armed'))
 }
 
 onWarning = function(){
@@ -67,7 +69,7 @@ exSounding = function(){
 }
 
 
-const stateMachine = new StateMachine();
+const alarmStateMachine = new StateMachine();
 
 const quiet = new State('quiet')
 const arming = new State('arming')
@@ -76,39 +78,39 @@ const warning = new State('warning')
 const sounding = new State('sounding')
 
 
-quiet.addTransition('armed',arming)
+quiet.addTransition('arm',arming)
 quiet.onEntry = onQuiet
 
-arming.addTransition('disarmed',quiet)
+arming.addTransition('disarm',quiet)
 arming.addTransition('armingTimeout',guarding)
 arming.onEntry = onArming
 arming.onExit = exArming
 
-guarding.addTransition('disarmed',quiet)
+guarding.addTransition('disarm',quiet)
 guarding.addTransition('intruder',warning)
 guarding.onEntry = onGuarding
 
-warning.addTransition('disarmed',quiet)
+warning.addTransition('disarm',quiet)
 warning.addTransition('warningTimeout',sounding)
 warning.onEntry = onWarning
 warning.onExit = exWarning
 
-sounding.addTransition('disarmed',quiet)
+sounding.addTransition('disarm',quiet)
 sounding.onEntry = onSounding
 sounding.onExit = exSounding
 
-stateMachine.setInitial(quiet)
+alarmStateMachine.setInitial(quiet)
 
 EventBus.register({
-	caller:this,
-	provides:['warningTimeout','armingTimeout'],
+	caller:alarmStateMachine,
+	provides:['warningTimeout','armingTimeout','armed','disarmed'],
 	needs:{
-		warningTimeout: stateMachine.eventHandler,
-		armingTimeout: stateMachine.eventHandler,
-		armed: stateMachine.eventHandler,
-		disarmed: stateMachine.eventHandler,
-		intruder: stateMachine.eventHandler,
+		warningTimeout: alarmStateMachine.eventHandler,
+		armingTimeout: alarmStateMachine.eventHandler,
+		arm: alarmStateMachine.eventHandler,
+		disarm: alarmStateMachine.eventHandler,
+		intruder: alarmStateMachine.eventHandler,
 	}
 })
 
-module.exports = stateMachine
+module.exports = alarmStateMachine

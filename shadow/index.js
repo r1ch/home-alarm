@@ -1,4 +1,5 @@
-const watcher = require('../system');
+const EventBus = require('../event-bus')
+const Message = require('../event-bus/message')
 const _ = require("lodash")
 const config = require("../config")
 var awsIot = require('aws-iot-device-sdk');
@@ -19,17 +20,12 @@ var shadow = awsIot.thingShadow({
 shadow.on('connect', function() {
 	shadow.register('Alarm',{},()=>{
 		console.log("Connected to Amazon IoT")
-		watcher.on('change',()=>{
-			queueUpdate(watcher.shadow);
-		})
-		shadow.update('Alarm', watcher.shadow);
 	});
 });
 
 
 shadow.on('status', 
     function(thingName, stat, clientToken, stateObject) {
-	//console.log("Status",clientToken)
 	tryUpdate();
 });
 
@@ -37,29 +33,27 @@ shadow.on('delta',
     function(thingName, stateObject) {
 	if(thingName == "Alarm" && stateObject.state && typeof stateObject.state.armed !== 'undefined'){
 		if(stateObject.state.armed == true){
-			watcher.arm();
+			this.emit(...Message('arm','via Amazon'))		
 		} else if (stateObject.state.armed == false){
-			watcher.disarm();
+			this.emit(...Message('disarm','via Amazon'))
 		}
 	}
     });
 
 shadow.on('timeout',
     function(thingName, clientToken) {
-	//console.error("Timeout",clientToken)
 	tryUpdate();
 });
 
 shadow.on('error',
 	function(error){	
-		console.log("Error:",Date.now())
+	console.log("Error:",Date.now())
 });
 
 
 
 function queueUpdate(update){
 	Q.unshift(update);
-	//console.log("Queued, now",Q.length)
 	tryUpdate();
 }
 
@@ -81,3 +75,16 @@ function tryUpdate(){
 	}
 }
 
+const updateArmedState = ()=>{}
+const updateAlarmState = ()=>{}
+
+
+EventBus.register({
+	caller:this,
+	provides: ['disarm','arm'],
+	needs: {
+		arm: updateArmedState,
+		disarm: updateArmedState,
+		stateChange: updateAlarmState,
+	}
+})

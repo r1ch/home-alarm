@@ -1,3 +1,4 @@
-const Watcher = require('./watcher.js')
+const AlarmRunner = require('./alarmstate.js')
+const StrategyRunner = require('./strategy.js')
 
-module.exports = new Watcher(); 
+module.exports = AlarmRunner

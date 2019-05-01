@@ -1,27 +1,29 @@
 'use strict'
-const pi = require('./pi');
-const Led = require('./led');
+const gpio = require('rpi-gpio');
+
 const Message = require('../event-bus/message');
 const EventEmitter  = require('events').EventEmitter;
 
+const changeRegister = {}
+const handleChange = (channel)=>{
+	if(changeRegister[channel]){
+		changeRegister[channel].emit(...Message('movement',changeRegister[channel].name))
+	}
+}
+gpio.on('change',handleChange)
+
+
 
 module.exports = class Sensor extends EventEmitter{
-	constructor(name, pin, led){
+	constructor(name, pin){
 		super();
 		this.type = "Sensor";
 		this.pin = pin;
-		this.led = new Led(led);
 		this.name = name;
-		pi.pinMode(this.pin, pi.INPUT);
-		pi.wiringPiISR(this.pin,pi.INT_EDGE_BOTH,function(){
-			let value = +!pi.digitalRead(this.pin);
-			if(value === 1){
-				this.led.on();
-				this.emit(...Message('movement',this.name));
-			} else {
-				this.led.off();
-			}
+		gpio.setup(this.pin,gpio.DIR_IN,gpio.EDGE_FALLING,(err,event)=>{
+			if(err) console.error(`Sensor error ${err}, for ${this.pin}`)
 		})
+		changeRegister[this.pin] = this
 	}
 
 	registerWith(eventBus){

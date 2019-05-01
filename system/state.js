@@ -1,8 +1,8 @@
 module.exports = class State {
 	constructor(name){
-		super()
-	    this._name = name;
+		this._name = name;
 		this.transitions = {}
+		this.consumers = {}
 		this.onEntry = ()=>{}
 		this.onExit = ()=>{}
 	}
@@ -15,8 +15,12 @@ module.exports = class State {
 		this._name = name
 	}
 	
-	addTransition(event){
-        this.transitions[event]
+	addTransition(eventName){
+        	this.transitions[eventName]
+	}
+
+	addConsumer(eventName,consumer){
+		this.consumers[eventName]=consumer
 	}
 
 }

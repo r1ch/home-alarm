@@ -1,6 +1,5 @@
 'use strict'
-const pi = require('./pi.js')
-const Led = require('./led.js')
+const gpio = require('rpi-gpio');
 const Message  = require('../event-bus/message.js');
 const EventEmitter = require('events').EventEmitter
 
@@ -13,15 +12,14 @@ var   WARN_OFF = WARN_OFF_SLOW
 
 module.exports = class Bell extends EventEmitter{
 
-	constructor(name, pin,ledOn,ledOff){
+	constructor(name, pin){
 		super()
 		this.type = "Bell"
 		this.name = name;
 		this.pin = pin;
-		this.ledOn = new Led(ledOn);
-		this.ledOff = ledOff && new Led(ledOff);
-		pi.pinMode(pin,pi.OUTPUT);
-		this.stop();
+		gpio.setup(this.pin,gpio.DIR_LOW,(err)=>{
+                        if(err) console.error(`Bell error ${err}`)
+                });
 	}
 
 	registerWith(eventBus){
@@ -33,16 +31,12 @@ module.exports = class Bell extends EventEmitter{
 
 	start(suppress){
 		if(!suppress) this.emit(...Message('sounding',this.name))
-		this.ledOff && this.ledOff.off()
-		pi.digitalWrite(this.pin,1)
-		this.ledOn.on()
+		gpio.write(this.pin,1)
 	}
 
 	stop(suppress){
 		if(!suppress) this.emit(...Message('silenced',this.name))
-		this.ledOn.off()
-		pi.digitalWrite(this.pin,0)
-		this.ledOff && this.ledOff.on()
+		gpio.write(this.pin,0)
 	}
 
 	short(interval){
