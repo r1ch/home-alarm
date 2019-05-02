@@ -15,8 +15,8 @@ module.exports = class State {
 		this._name = name
 	}
 
-	addTransition(eventName) {
-		this.transitions[eventName]
+	addTransition(eventName,nextState) {
+		this.transitions[eventName] = nextState;
 	}
 
 	addConsumer(eventName, consumer) {
