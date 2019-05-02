@@ -20,6 +20,13 @@ var shadow = awsIot.thingShadow({
 shadow.on('connect', function () {
 	shadow.register('Alarm', {}, () => {
 		console.log("Connected to Amazon IoT")
+		queueUpdate({
+			state:{
+				reported:{
+					armed:false
+				}
+			}
+		})
 	});
 });
 
