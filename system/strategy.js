@@ -15,12 +15,12 @@ blindConsumer = function () {
 }
 
 bedtimeConsumer = function (event) {
-	if (event.detail === "Lounge") this.emit(...Message('disarm'))
-	else this.emit(...Message('intruder'))
+	if (event.detail === "Lounge") strategyStateMachine.emit(...Message('disarm'))
+	else strategyStateMachine.emit(...Message('intruder'))
 }
 
 standardConsumer = function (event) {
-	this.emit(...Message('intruder'))
+	strategyStateMachine.emit(...Message('intruder'))
 }
 
 
