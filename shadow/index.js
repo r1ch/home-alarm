@@ -92,6 +92,9 @@ const updateArmedState = (event) => {
 	console.log("IoT update for armed event",event)
 		queueUpdate({
 			state:{
+				desired:{
+					armed:null	
+				},
 				reported:{
 					armed:(event.name === 'armed')
 				}
@@ -114,6 +117,9 @@ const updateStrategyState = (event) => {
 	console.log("IoT update for strategy event",event)
 	queueUpdate({
 		state:{
+			desired:{
+				strategy: null
+			},
 			reported:{
 				strategy:event.detail
 			}
