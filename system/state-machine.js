@@ -37,9 +37,6 @@ module.exports = class StateMachine extends EventEmitter {
 			console.log(this._currentState.name, "consuming:", event.name)
 			this._currentState.consumers[event.name](event)
 		} else {
-			console.log(JSON.stringify(this._currentState.transitions))
-			console.log(JSON.stringify(this._currentState.transitions[event.name]))
-			console.log(JSON.stringify(event))
 			console.log(this._currentState.name, ". (", event.name, ")")
 		}
 	}
