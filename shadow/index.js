@@ -43,7 +43,8 @@ shadow.on('delta',
 				this.emit(...Message('arm', 'via Amazon'))
 			} else if (stateObject.state.armed == false) {
 				this.emit(...Message('disarm', 'via Amazon'))
-			} else if (stateObject.state.strategy == 'bedtime'){
+			}
+			if (stateObject.state.strategy == 'bedtime'){
 				this.emit(...Message('bedtime', 'via Amazon'))
 			} else if (stateObject.state.strategy == 'standard'){
 				this.emit(...Message('standard', 'via Amazon'))
