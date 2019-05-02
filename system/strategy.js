@@ -15,7 +15,7 @@ blindConsumer = function () {
 }
 
 bedtimeConsumer = function (event) {
-	if (event.detail === "Lounge") strategyStateMachine.emit(...Message('disarm'))
+	if (event.detail === "Lounge") strategyStateMachine.emit(...Message('disarm','via bedtime'))
 	else strategyStateMachine.emit(...Message('intruder'))
 }
 
@@ -25,14 +25,17 @@ standardConsumer = function (event) {
 
 
 blind.addTransition('armed', standard)
+blind.addTransition('bedtime', bedtime)
 blind.addConsumer('movement', blindConsumer)
 
 standard.addTransition('bedtime', bedtime)
 standard.addTransition('disarm', blind)
 standard.addConsumer('movement', standardConsumer)
 
-bedtime.addConsumer('movement', bedtimeConsumer)
+bedtime.addTransition('standard',standard)
 bedtime.addTransition('disarm', blind)
+bedtime.addConsumer('movement', bedtimeConsumer)
+
 
 strategyStateMachine.setInitial(blind)
 
