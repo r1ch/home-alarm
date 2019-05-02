@@ -7,6 +7,7 @@ class EventBus {
     inbound(event){
 	console.log(`Got ${event.name}:${event.detail}:${event.time}`)
         if(event  && event.name &&  register[event.name]){
+	    console.log(`Calling ${register[event.name].length} handlers ${register[event.name][0]}`)
             register[event.name].forEach(handler=>handler(event));
         } else if (!event.name) {
             console.error(event,"missing name")

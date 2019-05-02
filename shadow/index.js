@@ -80,7 +80,7 @@ const updateAlarmState = ()=>{}
 
 
 EventBus.register({
-	caller:this,
+	caller:shadow,
 	provides: ['disarm','arm'],
 	needs: {
 		arm: updateArmedState,
