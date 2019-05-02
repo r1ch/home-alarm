@@ -4,7 +4,7 @@ let checkTimeout = null
 
 class EventBus {
     constructor() {
-        checkTimeout =  setTimeout(check,3000)
+        checkTimeout =  setTimeout(()=>{EventBus.check},3000)
     }
 
     inbound(event) {
