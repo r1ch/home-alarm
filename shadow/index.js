@@ -86,7 +86,7 @@ const updateArmedState = (event) => {
 const updateAlarmState = (event) => {
 	queueUpdate({
 		reported:{
-			state:(event.name)
+			state:event.name
 		}
 	})
 }
