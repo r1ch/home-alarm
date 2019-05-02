@@ -30,11 +30,11 @@ module.exports = class StateMachine extends EventEmitter {
 		} else if (this.currentState.transitions[event.name]) {
 			console.log(this._currentState.name, "->", this._currentState.transitions[event.name].name, ":", event.name)
 			this._currentState.onExit()
-			this._currentState = self._currentState.transitions[event.name]
+			this._currentState = this._currentState.transitions[event.name]
 			this._currentState.onEntry()
 			this.emit(...Message(`${this.name}:${this._currentState.name}`, this._currentState.name))
-		} else if (self.currentState.consumers[event.name]) {
-			console.log(self._currentState.name, "consuming:", event.name)
+		} else if (this.currentState.consumers[event.name]) {
+			console.log(this._currentState.name, "consuming:", event.name)
 			this._currentState.consumers[event.name](event)
 		} else {
 			console.log(this._currentState.name, ". (", event.name, ")")
