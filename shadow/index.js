@@ -105,6 +105,17 @@ const updateAlarmState = (event) => {
 	})
 }
 
+const updateStrategyState = (event) => {
+	console.log("IoT update for strategy event",event)
+	queueUpdate({
+		state:{
+			reported:{
+				state:event.detail
+			}
+		}
+	})
+}
+
 
 EventBus.register({
 	caller: shadow,
@@ -113,5 +124,6 @@ EventBus.register({
 		armed: updateArmedState,
 		disarmed: updateArmedState,
 		alarmState: updateAlarmState,
+		strategyState: updateStrategyState,
 	}
 })
