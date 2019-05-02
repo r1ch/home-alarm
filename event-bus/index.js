@@ -22,8 +22,6 @@ class EventBus {
         } else if (!request.caller.on || typeof request.caller.on !== "function") {
             console.error("Caller isn't an EventEmitter")
         } else {
-            console.log(JSON.stringify(request))
-
             if (request.provides) {
                 request.provides.forEach((event) => {
                     request.caller.on(event, this.inbound)
