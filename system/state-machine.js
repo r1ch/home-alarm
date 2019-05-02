@@ -27,7 +27,7 @@ module.exports = class StateMachine extends EventEmitter {
 	eventHandler(event) {
 		if (null === this._currentState) {
 			console.log("Got event ", event.name, " while uninitialised")
-		} else if (this.currentState.transitions[event.name]) {
+		} else if (this._currentState.transitions[event.name]) {
 			console.log(this._currentState.name, "->", this._currentState.transitions[event.name].name, ":", event.name)
 			this._currentState.onExit()
 			this._currentState = this._currentState.transitions[event.name]

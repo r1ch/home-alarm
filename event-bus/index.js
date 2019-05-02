@@ -7,7 +7,7 @@ class EventBus {
     inbound(event) {
         console.log(`Got ${event.name}:${event.detail}:${event.time}`)
         if (event && event.name && register[event.name]) {
-            console.log(`Calling ${register[event.name].length} handlers ${register[event.name][0]}`)
+            console.log(`Calling ${register[event.name].length} handlers`)
             register[event.name].forEach(handler => handler(event));
         } else if (!event.name) {
             console.error(event, "missing name")
@@ -17,7 +17,6 @@ class EventBus {
     }
 
     register(request) {
-
         if (!request.caller) {
             console.error("Couldn't register", request)
         } else if (!request.caller.on || typeof request.caller.on !== "function") {
