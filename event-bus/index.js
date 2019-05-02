@@ -1,7 +1,10 @@
 const register = [];
+const providerFound = {};
+let checkTimeout = null
 
 class EventBus {
     constructor() {
+        checkTimeout =  setTimeout(check,3000)
     }
 
     inbound(event) {
@@ -25,6 +28,7 @@ class EventBus {
             if (request.provides) {
                 request.provides.forEach((event) => {
                     request.caller.on(event, this.inbound)
+                    providerFound[event] = true;
                 })
             }
 
@@ -38,6 +42,15 @@ class EventBus {
 
         }
 
+    }
+
+    check(){
+        register.forEach((event)=>{
+            if(!providerFound(event)) console.error(`No provider available for ${event}`)
+        })
+        Object.keys(providerFound).forEach((event)=>{
+            if(!register[event]) console.warn(`There's no listener for ${event}`)
+        })
     }
 
 }
