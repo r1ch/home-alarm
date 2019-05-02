@@ -25,6 +25,7 @@ onArming = function () {
 	sounder.short(ARMING_BEEP, "arming")
 	let self = this
 	this.armingTimeout = setTimeout(() => {
+		console.log(`Got ${self}`)
 		self.emit(...Message('armingTimeout'))
 	}, ARMING_PERIOD)
 }
