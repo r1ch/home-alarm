@@ -40,7 +40,7 @@ class EventBus {
             }
 
         }
-        check()
+        EventBus.check()
     }
 
     check(){
