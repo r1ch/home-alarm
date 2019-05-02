@@ -1,69 +1,69 @@
 'use strict'
 const gpio = require('rpi-gpio');
-const Message  = require('../event-bus/message.js');
+const Message = require('../event-bus/message.js');
 const EventEmitter = require('events').EventEmitter
 
 const TEST_ON = 50;
 const WARN_ON = 50;
 const WARN_OFF_SLOW = 1000;
 const WARN_OFF_FAST = 300;
-var   WARN_OFF = WARN_OFF_SLOW
+var WARN_OFF = WARN_OFF_SLOW
 
 
-module.exports = class Bell extends EventEmitter{
+module.exports = class Bell extends EventEmitter {
 
-	constructor(name, pin){
+	constructor(name, pin) {
 		super()
 		this.type = "Bell"
 		this.name = name;
 		this.pin = pin;
-		gpio.setup(this.pin,gpio.DIR_LOW,(err)=>{
-                        if(err) console.error(`Bell error ${err}`)
-                });
+		gpio.setup(this.pin, gpio.DIR_LOW, (err) => {
+			if (err) console.error(`Bell error ${err}`)
+		});
 	}
 
-	registerWith(eventBus){
+	registerWith(eventBus) {
 		eventBus.register({
-			caller:this,
-			provides:['sounding','silenced']
+			caller: this,
+			provides: ['sounding', 'silenced']
 		})
 	}
 
-	start(suppress){
-		if(!suppress) this.emit(...Message('sounding',this.name))
-		gpio.write(this.pin,1)
+	start(suppress) {
+		if (!suppress) this.emit(...Message('sounding', this.name))
+		gpio.write(this.pin, 1)
 	}
 
-	stop(suppress){
-		if(!suppress) this.emit(...Message('silenced',this.name))
-		gpio.write(this.pin,0)
+	stop(suppress) {
+		if (!suppress) this.emit(...Message('silenced', this.name))
+		gpio.write(this.pin, 0)
 	}
 
-	short(interval){
+	short(interval) {
 		var _this = this;
-		setTimeout(function(){_this.stop(true)},interval);
+		setTimeout(function () { _this.stop(true) }, interval);
 		this.start(true)
 	}
 
-	startWarning(){	
+	startWarning() {
 		var _this = this
-		_this.warningInterval = setInterval(function(){
+		_this.warningInterval = setInterval(function () {
 			_this.short(WARN_ON)
-		},WARN_ON+WARN_OFF)	
+		}, WARN_ON + WARN_OFF)
 	}
 
-	lastWarning(){
+	lastWarning() {
 		this.clearWarningInterval()
 		WARN_OFF = WARN_OFF_FAST;
-		this.startWarning()	
+		this.startWarning()
 	}
 
-	clearWarningInterval(){
+	clearWarningInterval() {
 		this.warningInterval && clearInterval(this.warningInterval);
 		this.warningInterval = null;
 	}
 
-	stopWarning(){
+	stopWarning() {
 		this.clearWarningInterval();
 		this.stop();
 		WARN_OFF = WARN_OFF_SLOW;

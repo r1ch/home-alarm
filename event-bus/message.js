@@ -1,4 +1,4 @@
-module.exports = (eventName,detail)=>{
+module.exports = (eventName, detail) => {
     return [
         eventName,
         {
