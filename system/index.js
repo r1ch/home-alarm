@@ -1,4 +1,4 @@
-const AlarmRunner = require('./alarm.js/index.js')
-const StrategyRunner = require('./strategy.js')
+const AlarmRunner = require('./alarm')
+const StrategyRunner = require('./strategy')
 
 module.exports = AlarmRunner
