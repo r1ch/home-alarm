@@ -21,7 +21,7 @@ module.exports = class StateMachine extends EventEmitter {
 	setInitial(state) {
 		this._initialState = state
 		this._currentState = this._initialState
-		this.emit(...Message('stateChange', this._currentState.name))
+		this.emit(...Message(`${this.name}`, this._currentState.name))
 	}
 
 	eventHandler(event) {
@@ -32,7 +32,7 @@ module.exports = class StateMachine extends EventEmitter {
 			this._currentState.onExit()
 			this._currentState = this._currentState.transitions[event.name]
 			this._currentState.onEntry()
-			this.emit(...Message(`${this.name}:${this._currentState.name}`, this._currentState.name))
+			this.emit(...Message(`${this.name}`, this._currentState.name))
 		} else if (this._currentState.consumers[event.name]) {
 			console.log(this._currentState.name, "consuming:", event.name)
 			this._currentState.consumers[event.name](event)

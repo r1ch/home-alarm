@@ -76,6 +76,7 @@ function tryUpdate() {
 }
 
 const updateArmedState = (event) => {
+	console.log("IoT update for armed event",event)
 		queueUpdate({
 			reported:{
 				armed:(event.name === 'armed')
@@ -84,9 +85,10 @@ const updateArmedState = (event) => {
 }
 
 const updateAlarmState = (event) => {
+	console.log("IoT update for state event",event)
 	queueUpdate({
 		reported:{
-			state:event.name
+			state:event.detail
 		}
 	})
 }
@@ -98,6 +100,6 @@ EventBus.register({
 	needs: {
 		armed: updateArmedState,
 		disarmed: updateArmedState,
-		stateChange: updateAlarmState,
+		alarmState: updateAlarmState,
 	}
 })

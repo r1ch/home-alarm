@@ -4,7 +4,7 @@ const StateMachine = require('./state-machine.js')
 const State = require('./state.js')
 
 
-const strategyStateMachine = new StateMachine();
+const strategyStateMachine = new StateMachine('strategyState');
 
 const blind = new State('blind')
 const standard = new State('standard')

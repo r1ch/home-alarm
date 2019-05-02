@@ -4,7 +4,7 @@ const EventBus = require('../event-bus')
 const StateMachine = require('./state-machine.js')
 const State = require('./state.js')
 
-const alarmStateMachine = new StateMachine();
+const alarmStateMachine = new StateMachine('alarmState');
 const sounder = Hardware.sounder
 const bell = Hardware.bell
 
