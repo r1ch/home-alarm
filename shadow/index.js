@@ -53,6 +53,7 @@ shadow.on('error',
 
 
 function queueUpdate(update) {
+	console.log(update)
 	Q.unshift(update);
 	tryUpdate();
 }
@@ -78,8 +79,10 @@ function tryUpdate() {
 const updateArmedState = (event) => {
 	console.log("IoT update for armed event",event)
 		queueUpdate({
-			reported:{
-				armed:(event.name === 'armed')
+			state:{
+				reported:{
+					armed:(event.name === 'armed')
+				}
 			}
 		})
 }
@@ -87,8 +90,10 @@ const updateArmedState = (event) => {
 const updateAlarmState = (event) => {
 	console.log("IoT update for state event",event)
 	queueUpdate({
-		reported:{
-			state:event.detail
+		state:{
+			reported:{
+				state:event.detail
+			}
 		}
 	})
 }
