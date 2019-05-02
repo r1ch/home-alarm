@@ -38,11 +38,15 @@ shadow.on('status',
 
 shadow.on('delta',
 	function (thingName, stateObject) {
-		if (thingName == "Alarm" && stateObject.state && typeof stateObject.state.armed !== 'undefined') {
+		if (thingName == "Alarm" && stateObject.state) {
 			if (stateObject.state.armed == true) {
 				this.emit(...Message('arm', 'via Amazon'))
 			} else if (stateObject.state.armed == false) {
 				this.emit(...Message('disarm', 'via Amazon'))
+			} else if (stateObject.state.strategy == 'bedtime'){
+				this.emit(...Message('bedtime', 'via Amazon'))
+			} else if (stateObject.state.strategy == 'standard'){
+				this.emit(...Message('standard', 'via Amazon'))
 			}
 		}
 	});
@@ -110,7 +114,7 @@ const updateStrategyState = (event) => {
 	queueUpdate({
 		state:{
 			reported:{
-				state:event.detail
+				strategy:event.detail
 			}
 		}
 	})
@@ -119,7 +123,7 @@ const updateStrategyState = (event) => {
 
 EventBus.register({
 	caller: shadow,
-	provides: ['disarm', 'arm'],
+	provides: ['disarm', 'arm', 'bedtime', 'standard'],
 	needs: {
 		armed: updateArmedState,
 		disarmed: updateArmedState,
