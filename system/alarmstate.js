@@ -23,8 +23,9 @@ onQuiet = function () {
 onArming = function () {
 	console.log("->Arming", new Date())
 	sounder.short(ARMING_BEEP, "arming")
+	let self = this
 	this.armingTimeout = setTimeout(() => {
-		this.emit(...Message('armingTimeout'))
+		self.emit(...Message('armingTimeout'))
 	}, ARMING_PERIOD)
 }
 
@@ -44,8 +45,9 @@ onWarning = function () {
 	this.lastWarningTimeout = setTimeout(() => {
 		sounder.lastWarning();
 	}, WARNING_PERIOD - LAST_WARNING_PERIOD)
+	let self = this
 	this.warningTimeout = setTimeout(() => {
-		this.emit(...Message('warningTimeout'))
+		self.emit(...Message('warningTimeout'))
 	}, WARNING_PERIOD)
 }
 
