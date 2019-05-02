@@ -75,16 +75,29 @@ function tryUpdate() {
 	}
 }
 
-const updateArmedState = () => { }
-const updateAlarmState = () => { }
+const updateArmedState = (event) => {
+		queueUpdate({
+			reported:{
+				armed:(event.name === 'armed')
+			}
+		})
+}
+
+const updateAlarmState = (event) => {
+	queueUpdate({
+		reported:{
+			state:(event.name)
+		}
+	})
+}
 
 
 EventBus.register({
 	caller: shadow,
 	provides: ['disarm', 'arm'],
 	needs: {
-		arm: updateArmedState,
-		disarm: updateArmedState,
+		armed: updateArmedState,
+		disarmed: updateArmedState,
 		stateChange: updateAlarmState,
 	}
 })
