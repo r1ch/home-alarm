@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter;
 const Message = require('../event-bus/message')
+const EventBus = require('../event-bus')
 
 module.exports = class StateMachine extends EventEmitter {
 	constructor(name) {
@@ -8,6 +9,10 @@ module.exports = class StateMachine extends EventEmitter {
 		this._currentState = null;
 		this._initialState = null;
 		this.eventHandler = this.eventHandler.bind(this)
+		EventBus.register({
+			caller:this,
+			provides:[this.name]
+		})
 	}
 
 	set currentState(state) {
