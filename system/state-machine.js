@@ -33,10 +33,11 @@ module.exports = class StateMachine extends EventEmitter {
 			this._currentState = this._currentState.transitions[event.name]
 			this._currentState.onEntry()
 			this.emit(...Message(`${this.name}:${this._currentState.name}`, this._currentState.name))
-		} else if (this.currentState.consumers[event.name]) {
+		} else if (this._currentState.consumers[event.name]) {
 			console.log(this._currentState.name, "consuming:", event.name)
 			this._currentState.consumers[event.name](event)
 		} else {
+			console.log(`Ignored because ${this._currentState.transitions}`)
 			console.log(this._currentState.name, ". (", event.name, ")")
 		}
 	}
