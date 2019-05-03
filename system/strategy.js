@@ -7,11 +7,16 @@ const State = require('./state.js')
 const strategyStateMachine = new StateMachine('strategyState');
 
 const blind = new State('blind')
-const standard = new State('standard')
-const bedtime = new State('bedtime')
+const watching = new State('watching')
 
-blindConsumer = function () {
-	console.log("Ignoring movment")
+onBlind = function(){
+	watching.addConsumer('movement',standardConsumer)
+}
+
+strategyChangeConsumer = function (event) {
+	if(event.name === "bedtime"){
+		watching.addConsumer('movement',bedtimeConsumer)
+	}
 }
 
 bedtimeConsumer = function (event) {
@@ -23,18 +28,12 @@ standardConsumer = function (event) {
 	strategyStateMachine.emit(...Message('intruder'))
 }
 
+blind.onEntry = onBlind
+blind.addTransition('armed', watching)
+blind.addConsumer('bedtime', strategyChangeConsumer)
 
-blind.addTransition('armed', standard)
-blind.addTransition('bedtime', bedtime)
-blind.addConsumer('movement', blindConsumer)
-
-standard.addTransition('bedtime', bedtime)
-standard.addTransition('disarm', blind)
-standard.addConsumer('movement', standardConsumer)
-
-bedtime.addTransition('standard',standard)
-bedtime.addTransition('disarm', blind)
-bedtime.addConsumer('movement', bedtimeConsumer)
+watching.addTransition('disarm', blind)
+watching.addConsumer('movement', standardConsumer)
 
 
 strategyStateMachine.setInitial(blind)
