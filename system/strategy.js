@@ -7,15 +7,16 @@ const State = require('./state.js')
 const strategyStateMachine = new StateMachine('strategyState');
 
 const blind = new State('blind')
-const watching = new State('watching')
+const standard = new State('standard')
+const bedtime = new State('bedtime')
 
 onBlind = function(){
-	watching.addConsumer('movement',standardConsumer)
+	blind.addTransition('armed',standard)
 }
 
 strategyChangeConsumer = function (event) {
 	if(event.name === "bedtime"){
-		watching.addConsumer('movement',bedtimeConsumer)
+		blind.addTransition('armed',bedtime)
 	}
 }
 
@@ -29,11 +30,14 @@ standardConsumer = function (event) {
 }
 
 blind.onEntry = onBlind
-blind.addTransition('armed', watching)
+blind.addTransition('armed', standard)
 blind.addConsumer('bedtime', strategyChangeConsumer)
 
-watching.addTransition('disarm', blind)
-watching.addConsumer('movement', standardConsumer)
+standard.addTransition('disarm', blind)
+standard.addConsumer('movement', standardConsumer)
+
+bedtime.addTransition('disarm', blind)
+bedtime.addConsumer('movement', bedtimeConsumer)
 
 
 strategyStateMachine.setInitial(blind)
