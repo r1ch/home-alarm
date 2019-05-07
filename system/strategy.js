@@ -34,6 +34,7 @@ standardConsumer = function (event) {
 blind.onEntry = onBlind
 blind.addTransition('armed', standard)
 blind.addConsumer('bedtime', strategyChangeConsumer)
+blind.addConsumer('standard', strategyChangeConsumer)
 
 standard.addTransition('disarm', blind)
 standard.addTransition('bedtime', bedtime)
