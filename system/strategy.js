@@ -17,7 +17,9 @@ onBlind = function(){
 strategyChangeConsumer = function (event) {
 	if(event.name === "bedtime"){
 		blind.addTransition('armed',bedtime)
-	}
+	} else if (event.name === "standard"){
+                blind.addTransition('armed',standard)
+        }
 }
 
 bedtimeConsumer = function (event) {
@@ -34,9 +36,11 @@ blind.addTransition('armed', standard)
 blind.addConsumer('bedtime', strategyChangeConsumer)
 
 standard.addTransition('disarm', blind)
+standard.addTransition('bedtime', bedtime)
 standard.addConsumer('movement', standardConsumer)
 
 bedtime.addTransition('disarm', blind)
+bedtime.addTransition('standard', standard)
 bedtime.addConsumer('movement', bedtimeConsumer)
 
 
@@ -49,6 +53,7 @@ EventBus.register({
 		armed: strategyStateMachine.eventHandler,
 		disarm: strategyStateMachine.eventHandler,
 		bedtime: strategyStateMachine.eventHandler,
+                standard: strategyStateMachine.eventHandler,
 		movement: strategyStateMachine.eventHandler,
 	}
 })
