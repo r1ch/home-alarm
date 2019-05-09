@@ -18,10 +18,10 @@ class EventBus {
         }
     }
 
-    register(request) {
-        if (!request.caller) {
-            console.error("Couldn't register", request)
-        } else if (!request.caller.on || typeof request.caller.on !== "function") {
+    register(request,cb) {
+        if (!request.caller && register.provides) {
+            console.error("Couldn't register - no caller", request)
+        } else if (register.provides && (!request.caller.on || typeof request.caller.on !== "function")) {
             console.error("Caller isn't an EventEmitter")
         } else {
             if (request.provides) {
@@ -40,7 +40,7 @@ class EventBus {
             }
 
         }
-        this.check()
+        cb && cb();
     }
 
     check(){
@@ -51,7 +51,6 @@ class EventBus {
             if(!register[event]) console.warn(`There's no listener for ${event}`)
         })
     }
-
 }
 
 module.exports = new EventBus()
