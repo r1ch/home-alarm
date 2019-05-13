@@ -57,6 +57,6 @@ EventBus.register({
                 standard: strategyStateMachine.eventHandler,
 		movement: strategyStateMachine.eventHandler,
 	}
-})
+},()=>{strategyStateMachine.setInitial(blind)})
 
 module.exports = strategyStateMachine

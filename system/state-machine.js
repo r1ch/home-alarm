@@ -25,6 +25,7 @@ module.exports = class StateMachine extends EventEmitter {
 
 	setInitial(state) {
 		this._initialState = state
+		this._initialState.onEntry();
 		this._currentState = this._initialState
 		this.emit(...Message(`${this.name}`, this._currentState.name))
 	}

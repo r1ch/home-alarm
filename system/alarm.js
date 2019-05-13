@@ -99,8 +99,6 @@ sounding.addTransition('disarm', quiet)
 sounding.onEntry = onSounding
 sounding.onExit = exSounding
 
-alarmStateMachine.setInitial(quiet)
-
 EventBus.register({
 	caller: alarmStateMachine,
 	provides: ['warningTimeout', 'armingTimeout', 'armed', 'disarmed'],
@@ -111,6 +109,6 @@ EventBus.register({
 		disarm: alarmStateMachine.eventHandler,
 		intruder: alarmStateMachine.eventHandler,
 	}
-})
+},()=>{alarmStateMachine.setInitial(quiet)})
 
 module.exports = alarmStateMachine

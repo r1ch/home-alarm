@@ -9,16 +9,12 @@ let clock;
 
 const Hardware = require("../hardware");
 Hardware.sounder.start = sinon.stub();
-Hardware.sounder.startWarning = sinon.stub();
-Hardware.sounder.lastWarning = sinon.stub();
 Hardware.sounder.short = sinon.stub();
 Hardware.sounder.stop = sinon.stub();
 Hardware.bell.start = sinon.stub();
 Hardware.bell.stop = sinon.stub();
 Hardware.reset = ()=>{
 	Hardware.sounder.start.reset()
-	Hardware.sounder.startWarning.reset()
-	Hardware.sounder.lastWarning.reset()
 	Hardware.sounder.short.reset()
 	Hardware.sounder.stop.reset()
 	Hardware.bell.start.reset()
@@ -75,7 +71,7 @@ describe("Home Alarm", function(){
 		})
 
 		it("Can connect to a sensor",function(done){
-			done()				
+				done()				
 		})
 
 		it("Wires up correctly",function(done){
@@ -86,12 +82,10 @@ describe("Home Alarm", function(){
 	})//Components
 
 	describe("State machine",function(){
-		let alarmStateMachine
 		const alarmStateSpy = sinon.spy()
 		const armedSpy = sinon.spy()
 		const disarmedSpy = sinon.spy()
 		const injector = new EventEmitter()
-
 		before(function(done){
 			EventBus.register({
 				caller: injector,
@@ -101,51 +95,45 @@ describe("Home Alarm", function(){
 					armed : armedSpy,
 					disarmed : disarmedSpy
 				}
-			},done)
+			},done)		
 		})
 
 		beforeEach(function(done){
+			alarmStateSpy.reset()
+			armedSpy.reset()
+			disarmedSpy.reset()
+			Hardware.reset()
 			clock = sinon.useFakeTimers();
 			done();
 		})
 		
 		afterEach(function(done){
-                        injector.emit(...Message('disarm'))
-			console.log("C",disarmedSpy.callCount)
-			alarmStateSpy.reset()
-			armedSpy.reset()
-			disarmedSpy.reset()
-			console.log("D",disarmedSpy.callCount)
-			Hardware.reset()
 			clock.restore();
 			done();
 		})
 
-		it("Starts with a quiet state",function(done){
-			alarmStateMachine = require('../system/alarm')
+		it("Has a quiet state",function(done){
+			let alarmStateMachine = require("../system/alarm")
+			
 			//start quiet
 			assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")				
-			assert(armedSpy.notCalled,"No arming signal")
-			console.log("E",disarmedSpy.callCount)
-
-			assert(disarmedSpy.calledOnce,"onEntry disarm signal")
-			assert(alarmStateSpy.calledOnce,"Emits")
-			assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','quiet')[1],"Emits quiet message")
+			assert(alarmStateSpy.calledOnce,"Emits quiet")
+			assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','quiet')[1],"Got quiet message")
 				
 			//doesn't move for intruder,armingTimeout,guardingTimeout
 			injector.emit(...Message('intruder'))
-			assert(alarmStateSpy.calledOnce,"Stays quiet for intruder")
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
 			injector.emit(...Message('warningTimeout'))
-			assert(alarmStateSpy.calledOnce,"Stays quiet for warningTimeout")
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
 			injector.emit(...Message('armingTimeout'))
-			assert(alarmStateSpy.calledOnce,"Stays quiet for armingTimeout")
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
 
 			//no sounds
 			assert(Hardware.bell.stop.calledOnce,"Stops the bell")
 			assert(Hardware.sounder.stop.calledOnce,"Stops the sounder")
-			assert(Hardware.sounder.short.notCalled,"No sounds (sounder short)")
-			assert(Hardware.sounder.start.notCalled,"No sounds (sounder start)")
-			assert(Hardware.bell.start.notCalled,"No sounds (bell start)")
+			assert(Hardware.sounder.short.notCalled,"No sounds")
+			assert(Hardware.sounder.start.notCalled,"No sounds")
+			assert(Hardware.sounder.start.notCalled,"No sounds")
 
 			assert.equal(alarmStateMachine.currentState.name,'quiet',"Stays quiet")				
 
@@ -154,6 +142,7 @@ describe("Home Alarm", function(){
 
 		
 		it("Has a disarmable arming state",function(done){
+			let alarmStateMachine = require("../system/alarm")
 			assert(alarmStateMachine.currentState.name === 'quiet',"Starts quiet")				
 			
 			//starts arming
@@ -175,67 +164,16 @@ describe("Home Alarm", function(){
 		})
 
 		it("automatically arms",function(done){
-			const ARMING_PERIOD = 30000
-			//start quiet
-			assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")				
-
-                        //starts arm
+			let alarmStateMachine = require("../system/alarm")
                         injector.emit(...Message('arm'))
-                        assert.equal(alarmStateMachine.currentState.name,'arming',"Starts arming")
-                        //up to the wire
-			clock.tick(ARMING_PERIOD-1)
-                        assert.equal(alarmStateMachine.currentState.name,'arming',"Still arming")
-			//over
-			clock.tick(1)
-		
-			//disarm
-                        assert.equal(alarmStateMachine.currentState.name,'guarding',"Now guarding")
-                        assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','guarding')[1],"Got guarding message")
-                        assert(armedSpy.calledOnce,"Armed event")
-			done()
+
 		})
 
 		it("can be disarmed from guarding",function(done){
-			assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")
-			//zero time arm
-			injector.emit(...Message('arm'))
-			injector.emit(...Message('armingTimeout'))
-			assert.equal(alarmStateMachine.currentState.name,'guarding',"Now guarding")
-			injector.emit(...Message('disarm'))
-			assert.equal(alarmStateMachine.currentState.name,'quiet',"Now quiet")
-                        assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','quiet')[1],"Got quiet message")
-			assert(disarmedSpy.calledOnce,"Disarmed event")
-
 			done()
 		})
 
 		it("detects an intruder",function(done){
-			const WARNING = 60e3
-			const LAST = 15e3
-			//starts quiet
-                        assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")
-			//zero time arm
-			injector.emit(...Message('arm'))
-			injector.emit(...Message('armingTimeout'))
-			assert.equal(alarmStateMachine.currentState.name,'guarding',"Now guarding")
-			//Synthetic intruder
-			injector.emit(...Message('intruder'))
-			assert.equal(alarmStateMachine.currentState.name,'warning',"Now warning")
-			assert(Hardware.sounder.startWarning.calledOnce,"Started warning")
-			assert(Hardware.bell.start.notCalled,"No bell")
-			clock.tick(WARNING-LAST-1)
-			assert(Hardware.sounder.startWarning.calledOnce,"Still warning")
-			assert(Hardware.sounder.lastWarning.notCalled,"Not last yet")
-			assert(Hardware.bell.start.notCalled,"No bell")
-			clock.tick(1)
-			assert(Hardware.sounder.lastWarning.calledOnce,"Last warning")
-			assert(Hardware.bell.start.notCalled,"No bell")
-			clock.tick(LAST-1)
-			assert(Hardware.sounder.lastWarning.calledOnce,"Still Last warning")
-			assert(Hardware.bell.start.notCalled,"No bell")
-
-				
-
 			done()
 		})
 
