@@ -1,11 +1,18 @@
 const assert = require("chai").assert;
 const path = require("path");
 const sinon = require("sinon");
-const gpio = require("rpi-gpio");
 const EventEmitter = require("events");
 const EventBus = require("../event-bus");
 const Message = require("../event-bus/message")
 let clock;
+
+
+const gpio = require("rpi-gpio");
+gpio.write = sinon.stub();
+
+gpio.reset = ()=>{
+	gpio.write.reset()
+}
 
 const Hardware = require("../hardware");
 Hardware.sounder.start = sinon.stub();
@@ -15,6 +22,9 @@ Hardware.sounder.short = sinon.stub();
 Hardware.sounder.stop = sinon.stub();
 Hardware.bell.start = sinon.stub();
 Hardware.bell.stop = sinon.stub();
+
+
+
 Hardware.reset = ()=>{
 	Hardware.sounder.start.reset()
 	Hardware.sounder.startWarning.reset()
@@ -64,13 +74,71 @@ describe("Home Alarm", function(){
 	})
 
 	describe("Components", function(){
+
+		beforeEach(function(done){
+			clock = sinon.useFakeTimers();
+			done();
+		})
+		
+
+		afterEach(function(done){
+			gpio.reset();
+			Hardware.reset();
+			clock.restore();
+			done();
+		})
+
 		it("Can send a warning",function(done){
+			const testPin = 29;
+			const WARN_ON = 50
+			const WARN_OFF_SLOW = 1000;
+			const WARN_OFF_FAST = 300;
+	
+			const Bell = require("../hardware/bell.js");
+			var bell = new Bell("Test",testPin);
+			
+			bell.startWarning()
+			//interval of "short" beeps
+			clock.tick(WARN_ON+WARN_OFF_SLOW)
+			//turned on
+			assert(gpio.write.firstCall.calledWith(testPin,1),"turned on the warning")
+			clock.tick(WARN_ON)
+			assert(gpio.write.secondCall.calledWith(testPin,0),"turned off the warning")
+			
+			//test 10
+			for(var i = 0; i < 3; i++){
+				clock.tick(WARN_OFF_SLOW)
+				assert(gpio.write.lastCall.calledWith(testPin,1),"turned on again")
+				clock.tick(WARN_ON)
+				assert(gpio.write.lastCall.calledWith(testPin,0),"turned off again")
+			}
+			
+			bell.lastWarning();
+			clock.tick(WARN_OFF_FAST+WARN_ON)
+			//last warning
+			for(var i = 0; i < 3; i++){
+				assert(gpio.write.lastCall.calledWith(testPin,1),"on quick")
+				clock.tick(WARN_ON)
+				assert(gpio.write.lastCall.calledWith(testPin,0),"off quick")
+				clock.tick(WARN_OFF_FAST)
+			}
+						
 			done()
 		})
 
 
-
 		it("Can connect to a bell",function(done){
+			const testPin = 29;
+			
+			const Bell = require("../hardware/bell.js");
+			var bell = new Bell("Test",testPin);			
+
+			bell.start()
+			assert(gpio.write.calledOnce,"called to turn on")
+			
+			bell.stop()
+			assert(gpio.write.calledTwice,"called again to turn off")
+
 			done()			
 		})
 
@@ -110,14 +178,14 @@ describe("Home Alarm", function(){
 		})
 		
 		afterEach(function(done){
+			console.log("--RESET--")
                         injector.emit(...Message('disarm'))
-			console.log("C",disarmedSpy.callCount)
 			alarmStateSpy.reset()
 			armedSpy.reset()
 			disarmedSpy.reset()
-			console.log("D",disarmedSpy.callCount)
 			Hardware.reset()
 			clock.restore();
+			console.log("---DONE---")
 			done();
 		})
 
@@ -240,14 +308,76 @@ describe("Home Alarm", function(){
 		})
 
 		it("can be disarmed when warning",function(done){
+			const WARNING = 60e3
+			//starts quiet
+                        assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")
+			//zero time arm
+			injector.emit(...Message('arm'))
+			injector.emit(...Message('armingTimeout'))
+			assert.equal(alarmStateMachine.currentState.name,'guarding',"Now guarding")
+			//Synthetic intruder
+			injector.emit(...Message('intruder'))
+			assert.equal(alarmStateMachine.currentState.name,'warning',"Now warning")
+			assert(Hardware.sounder.startWarning.calledOnce,"Started warning")
+			assert(Hardware.bell.start.notCalled,"No bell")
+			clock.tick(WARNING-1)
+			assert(Hardware.sounder.startWarning.calledOnce,"Still warning")
+			assert(Hardware.bell.start.notCalled,"No bell")
+			assert(disarmedSpy.notCalled,"Not disarmed yet")
+			injector.emit(...Message('disarm'))
+			assert.equal(alarmStateMachine.currentState.name,'quiet',"Now quiet")
+			assert(disarmedSpy.calledOnce,"Called disarm")		
 			done()
 		})
 
 		it("sets off the alarm after a timeout",function(done){
+			const WARNING = 60e3
+			//starts quiet
+                        assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")
+			//zero time arm
+			injector.emit(...Message('arm'))
+			injector.emit(...Message('armingTimeout'))
+			assert.equal(alarmStateMachine.currentState.name,'guarding',"Now guarding")
+			//Synthetic intruder
+			injector.emit(...Message('intruder'))
+			assert.equal(alarmStateMachine.currentState.name,'warning',"Now warning")
+			assert(Hardware.sounder.startWarning.calledOnce,"Started warning")
+			assert(Hardware.bell.start.notCalled,"No bell")
+			clock.tick(WARNING-1)
+			assert(Hardware.sounder.startWarning.calledOnce,"Still warning")
+			assert(Hardware.bell.start.notCalled,"No bell")
+			assert.equal(alarmStateMachine.currentState.name,'warning',"Still warning")
+			clock.tick(1)
+			assert(Hardware.bell.start.calledOnce,"BOOM!")
+			assert(Hardware.sounder.start.calledOnce,"BOOM!")
+			assert.equal(alarmStateMachine.currentState.name,'sounding',"Now Sounding")
+
+				
+
 			done()
 		})
 
 		it("the alarm can be disarmed once sounding",function(done){
+			const WARNING = 60e3
+			//starts quiet
+                        assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")
+			//zero time arm
+			injector.emit(...Message('arm'))
+			injector.emit(...Message('armingTimeout'))
+			injector.emit(...Message('intruder'))
+			assert(Hardware.sounder.start.notCalled,"Sounder")
+			assert(Hardware.bell.start.notCalled,"Bell")
+			injector.emit(...Message('warningTimeout'))
+			assert.equal(alarmStateMachine.currentState.name,'sounding',"Now sounding")
+			assert(Hardware.sounder.start.calledOnce,"Sounder")
+			assert(Hardware.bell.start.calledOnce,"Bell")
+			assert(Hardware.sounder.stop.calledOnce,"Sounder previously stopped")
+			assert(Hardware.bell.stop.notCalled,"Bell not previously stopped")
+			injector.emit(...Message('disarm'))
+			assert.equal(alarmStateMachine.currentState.name,'quiet',"Now quiet")
+			assert(Hardware.sounder.stop.calledThrice,"Sounder stopped")
+			assert(Hardware.bell.stop.calledTwice,"Bell stopped")
+			
 			done()
 		})
 	})
