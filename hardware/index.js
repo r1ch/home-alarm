@@ -1,4 +1,6 @@
 const gpio = require('rpi-gpio')
+gpio.setMode(gpio.MODE_RPI)
+
 const Sensor = require('./sensor')
 const Bell = require('./bell')
 const EventBus = require('../event-bus')

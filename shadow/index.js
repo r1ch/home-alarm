@@ -38,6 +38,7 @@ shadow.on('status',
 
 shadow.on('delta',
 	function (thingName, stateObject) {
+		console.log("SO:",stateObject)
 		if (thingName == "Alarm" && stateObject.state) {
 			if (stateObject.state.armed == true) {
 				this.emit(...Message('arm', 'via Amazon'))
@@ -104,13 +105,17 @@ const updateArmedState = (event) => {
 
 const updateAlarmState = (event) => {
 	console.log("IoT update for state event",event)
-	queueUpdate({
+	let update = {
 		state:{
 			reported:{
 				state:event.detail
 			}
 		}
-	})
+	}
+	if(event.detail === 'arming'){
+		update.state.reported.armed = 'arming'
+	} 
+	queueUpdate(update)
 }
 
 const updateStrategyState = (event) => {

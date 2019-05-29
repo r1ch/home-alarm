@@ -1,7 +1,15 @@
 const alarm = require('./hardware')
-const alarmStateMachine = require('./system')
+const monitor = require("./monitor")
 const shadow = require('./shadow')
-//const server = require('./server')
+
+let alarmStateMachine
+let server
+
+setTimeout(()=>{
+	alarmStateMachine = require('./system')
+	server = require('./server')
+},5000)
+
 
 process.on('uncaughtException', function (exception) {
 	console.log(exception);

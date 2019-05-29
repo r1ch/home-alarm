@@ -153,7 +153,38 @@ describe("Home Alarm", function(){
 
 	})//Components
 
-	describe("State machine",function(){
+	describe("Strategy state machine",function(){
+		let strategyStateMachine
+		const strategyStateSpy = sinon.spy()
+		const intruderSpy = sinon.spy()
+		const injector = new EventEmitter()
+		
+		before(function(done){
+			EventBus.register({
+				caller: injector,
+				provides : ['movement','disarm','bedtime'],
+				needs:{
+					strategyState: strategyStateSpy,
+					intruder: intruderSpy
+				}
+			},done)
+		})
+
+		afterEach(function(done){
+			console.log("--RESET--")
+			strategyStateSpy.reset()
+			intruderSpy.reset()
+			console.log("---DONE---")
+			done();
+		})
+				
+		it("ignores movement when blind",function(done){
+			done()
+		})
+
+	})
+
+	describe("Alarm state machine",function(){
 		let alarmStateMachine
 		const alarmStateSpy = sinon.spy()
 		const armedSpy = sinon.spy()
