@@ -157,13 +157,15 @@ describe("Home Alarm", function(){
 		let strategyStateMachine
 		const strategyStateSpy = sinon.spy()
 		const intruderSpy = sinon.spy()
+		const disarmSpy = sinon.spy()
 		const injector = new EventEmitter()
 		
 		before(function(done){
 			EventBus.register({
 				caller: injector,
-				provides : ['movement','disarm','bedtime'],
+				provides : ['movement','disarm','bedtime','armed'],
 				needs:{
+					disarm : disarmSpy,
 					strategyState: strategyStateSpy,
 					intruder: intruderSpy
 				}
@@ -172,15 +174,69 @@ describe("Home Alarm", function(){
 
 		afterEach(function(done){
 			console.log("--RESET--")
+			injector.emit(...Message("disarm"))
+			disarmSpy.reset()
 			strategyStateSpy.reset()
 			intruderSpy.reset()
 			console.log("---DONE---")
 			done();
 		})
 				
-		it("ignores movement when blind",function(done){
+		it("starts blind",function(done){
+			strategyStateMachine = require('../system/strategy')
+			assert.equal(strategyStateMachine.currentState.name,"blind")
 			done()
 		})
+		
+		it("ignores movement when blind",function(done){	
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			assert(intruderSpy.notCalled,"No intruders");
+			injector.emit(...Message('movement'))
+			assert(intruderSpy.notCalled,"No intruders");
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			done()
+		})
+
+		it("standard transition on armed",function(done){	
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('armed'))
+			assert.equal(strategyStateMachine.currentState.name,"standard")
+			done()
+		})
+
+		it("standard detects intruders",function(done){	
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('armed'))
+			assert.equal(strategyStateMachine.currentState.name,"standard")
+			assert(intruderSpy.notCalled,"No intruder")
+			injector.emit(...Message('movement'))
+			assert(intruderSpy.calledOnce,"Intruder")
+			done()
+		})
+
+		it("bedtime changes strategy",function(done){	
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('bedtime'))
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('armed'))
+			assert.equal(strategyStateMachine.currentState.name,"bedtime")
+			done()
+		})
+
+		it("bedtime disarmed by Lounge",function(done){	
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('bedtime'))
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			injector.emit(...Message('armed'))
+			assert.equal(strategyStateMachine.currentState.name,"bedtime")
+			assert(disarmSpy.notCalled,"Not disarmed yet")
+			injector.emit(...Message('movement','Lounge'))
+			assert.equal(strategyStateMachine.currentState.name,"blind")
+			assert(disarmSpy.calledOnce,"Disarm instructed after Lounge")
+			done()			
+		})
+
+
 
 	})
 
