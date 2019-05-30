@@ -1,0 +1,193 @@
+const assert = require("chai").assert;
+const path = require("path");
+const sinon = require("sinon");
+const gpio = require("rpi-gpio");
+const EventEmitter = require("events");
+const EventBus = require("../event-bus");
+const Message = require("../event-bus/message")
+let clock;
+
+const Hardware = require("../hardware");
+Hardware.sounder.start = sinon.stub();
+Hardware.sounder.short = sinon.stub();
+Hardware.sounder.stop = sinon.stub();
+Hardware.bell.start = sinon.stub();
+Hardware.bell.stop = sinon.stub();
+Hardware.reset = ()=>{
+	Hardware.sounder.start.reset()
+	Hardware.sounder.short.reset()
+	Hardware.sounder.stop.reset()
+	Hardware.bell.start.reset()
+	Hardware.bell.stop.reset()
+}
+
+describe("Home Alarm", function(){
+	describe("Event Bus", function(){		
+		it("Can register for events",function(done){
+			let caller = {
+				on: (event,callback)=>{
+					assert(event === 'event1',"Event passed")
+					done()
+				}
+			}
+			
+			EventBus.register({
+				caller: caller,
+				provides: ['event1']
+			})
+		})
+
+		it("Can pass on events", function(done){
+			let emitter = new EventEmitter();
+			let receiver = (event)=>{
+				assert(event.name === 'event2',"Event passed")
+				done()
+			}
+
+			EventBus.register({
+				caller: emitter,
+				provides: ['event2'],
+				needs:{
+					event2: receiver
+				}
+			})
+			
+			emitter.emit(...Message('event2'))
+			
+		})
+
+
+	})
+
+	describe("Components", function(){
+		it("Can send a warning",function(done){
+			done()
+		})
+
+
+
+		it("Can connect to a bell",function(done){
+			done()			
+		})
+
+		it("Can connect to a sensor",function(done){
+				done()				
+		})
+
+		it("Wires up correctly",function(done){
+			done()
+		})
+	
+
+	})//Components
+
+	describe("State machine",function(){
+		const alarmStateSpy = sinon.spy()
+		const armedSpy = sinon.spy()
+		const disarmedSpy = sinon.spy()
+		const injector = new EventEmitter()
+		before(function(done){
+			EventBus.register({
+				caller: injector,
+				provides : ['arm','disarm','intruder','warningTimeout','armingTimeout'],
+				needs:{
+					alarmState: alarmStateSpy,
+					armed : armedSpy,
+					disarmed : disarmedSpy
+				}
+			},done)		
+		})
+
+		beforeEach(function(done){
+			alarmStateSpy.reset()
+			armedSpy.reset()
+			disarmedSpy.reset()
+			Hardware.reset()
+			clock = sinon.useFakeTimers();
+			done();
+		})
+		
+		afterEach(function(done){
+			clock.restore();
+			done();
+		})
+
+		it("Has a quiet state",function(done){
+			let alarmStateMachine = require("../system/alarm")
+			
+			//start quiet
+			assert.equal(alarmStateMachine.currentState.name,'quiet',"Starts quiet")				
+			assert(alarmStateSpy.calledOnce,"Emits quiet")
+			assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','quiet')[1],"Got quiet message")
+				
+			//doesn't move for intruder,armingTimeout,guardingTimeout
+			injector.emit(...Message('intruder'))
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
+			injector.emit(...Message('warningTimeout'))
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
+			injector.emit(...Message('armingTimeout'))
+			assert(alarmStateSpy.calledOnce,"Starts quiet")
+
+			//no sounds
+			assert(Hardware.bell.stop.calledOnce,"Stops the bell")
+			assert(Hardware.sounder.stop.calledOnce,"Stops the sounder")
+			assert(Hardware.sounder.short.notCalled,"No sounds")
+			assert(Hardware.sounder.start.notCalled,"No sounds")
+			assert(Hardware.sounder.start.notCalled,"No sounds")
+
+			assert.equal(alarmStateMachine.currentState.name,'quiet',"Stays quiet")				
+
+			done()
+		})
+
+		
+		it("Has a disarmable arming state",function(done){
+			let alarmStateMachine = require("../system/alarm")
+			assert(alarmStateMachine.currentState.name === 'quiet',"Starts quiet")				
+			
+			//starts arming
+			injector.emit(...Message('arm'))
+			assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','arming')[1],"Got arming message")
+			assert.equal(alarmStateMachine.currentState.name,'arming',"Starts arming")				
+			assert(Hardware.sounder.short.calledOnce,"Arming beep")
+			//ignore intruder
+			injector.emit(...Message('intruder'))
+			assert.equal(alarmStateMachine.currentState.name,'arming',"Stays arming")
+			//disarm
+			injector.emit(...Message('disarm'))
+			assert.equal(alarmStateMachine.currentState.name,'quiet',"Disarmed")
+			assert.deepEqual(alarmStateSpy.lastCall.args[0],Message('alarmState','quiet')[1],"Got quiet message")
+			assert(disarmedSpy.calledOnce,"Disarmed event")
+			assert(armedSpy.notCalled,"Not armed")
+
+			done()
+		})
+
+		it("automatically arms",function(done){
+			let alarmStateMachine = require("../system/alarm")
+                        injector.emit(...Message('arm'))
+
+		})
+
+		it("can be disarmed from guarding",function(done){
+			done()
+		})
+
+		it("detects an intruder",function(done){
+			done()
+		})
+
+		it("can be disarmed when warning",function(done){
+			done()
+		})
+
+		it("sets off the alarm after a timeout",function(done){
+			done()
+		})
+
+		it("the alarm can be disarmed once sounding",function(done){
+			done()
+		})
+	})
+
+})//Home Alarm

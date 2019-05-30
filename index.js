@@ -1,18 +1,17 @@
-const alarm = require('./components')
-const watcher = require('./system')
-const server = require('./server')
+const alarm = require('./hardware')
+const monitor = require("./monitor")
 const shadow = require('./shadow')
+
+let alarmStateMachine
+let server
+
+setTimeout(()=>{
+	alarmStateMachine = require('./system')
+	server = require('./server')
+},5000)
+
 
 process.on('uncaughtException', function (exception) {
 	console.log(exception);
 	console.log(exception.stack);
 });
-
-
-alarm.sensors.forEach((sensor)=>{
-	watcher.addComponent(sensor)
-})
-
-watcher.addComponent(alarm.bell)
-watcher.addComponent(alarm.sounder)
-watcher.ready()
