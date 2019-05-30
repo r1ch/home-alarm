@@ -28,11 +28,10 @@ const eventHandler = function(event){
 	Namespace : "Alarm"
 	},(err,data)=>{
 		if(err) console.error(err)
-		else console.log(data)
 	})
 }
 
-setInterval(()=>{eventHandler({name:"heartbeat"})},30*60*60*1000);
+setInterval(()=>{eventHandler({name:"heartbeat"})},60*1000);
 
 const monitor = new Monitor()
 
