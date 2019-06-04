@@ -44,7 +44,7 @@ EventBus.register({
                 armed: monitor.eventHandler,
                 disarmed: monitor.eventHandler,
                 intruder: monitor.eventHandler,
-                bedroom: monitor.eventHandler,
+                bedtime: monitor.eventHandler,
 		movement: monitor.eventHandler		
         }
 })
