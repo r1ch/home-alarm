@@ -1,3 +1,4 @@
+
 const EventBus = require("../event-bus")
 const config = require("../config")
 const AWS = require ("aws-sdk")
@@ -17,21 +18,21 @@ class Monitor {
 }
 
 const eventHandler = function(event){
-	let name = event.name + (event.detail ? ':'+event.detail : '') 
-	monitor.cloudwatch.putMetricData({
-	MetricData : [{
-		MetricName : name,
-		StorageResolution: 60,
-		Timestamp : event.timestamp,
-		Value : 1.0
-	}],
-	Namespace : "Alarm"
-	},(err,data)=>{
+	let request = {
+		MetricData : [{
+			MetricName : event.name + (event.detail ? ":" + event.detail : ''),
+			StorageResolution: 60,
+			Timestamp : new Date(event.time),
+			Value : 1.0
+		}],
+		Namespace : "Alarm"
+	}
+	monitor.cloudwatch.putMetricData(request,(err,data)=>{
 		if(err) console.error(err)
 	})
 }
 
-setInterval(()=>{eventHandler({name:"heartbeat"})},60*1000);
+setInterval(()=>{eventHandler({name:"heartbeat",time:Date.now()})},60*1000);
 
 const monitor = new Monitor()
 
