@@ -23,6 +23,7 @@ router.get('/disarm', function (req, res) {
 
 router.get('/bedtime', function (req, res) {
   EventBus.inbound({name:"bedtime"})
+  EventBus.inbound({name:"arm"})
   res.send(true);
 })
 
