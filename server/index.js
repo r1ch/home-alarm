@@ -21,6 +21,11 @@ router.get('/disarm', function (req, res) {
   res.send(true);
 })
 
+router.get('/bedtime', function (req, res) {
+  EventBus.inbound({name:"bedtime"})
+  res.send(true);
+})
+
 
 app.use(express.static(__dirname + '/public'))
 app.use('/api', router)

@@ -32,7 +32,7 @@ const eventHandler = function(event){
 	})
 }
 
-setInterval(()=>{eventHandler({name:"heartbeat",time:Date.now()})},60*1000);
+setInterval(()=>{eventHandler({name:"heartbeat",time:Date.now()})},5*60*1000);
 
 const monitor = new Monitor()
 
