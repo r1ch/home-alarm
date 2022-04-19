@@ -60,7 +60,7 @@ shadow.on('timeout',
 
 shadow.on('error',
 	function (error) {
-		console.log("Error:", Date.now())
+		console.log("Error:", error, Date.now())
 	});
 
 
